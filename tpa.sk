@@ -1,0 +1,145 @@
+
+command /tpa [<text>] [<player>]:
+	permission: tpa.user
+	permission message: <##EEE8AA>TPA &f당신은 TPA를 사용할 권한이 없습니다!
+	trigger:
+		if arg 1 is not set:
+			send "<##EEE8AA>TPA &7TPA SYSTEM <cmd:/tpaon>&a[활성화]<reset> <cmd:/tpaoff>&c[비활성화]<reset>"
+			send ""
+			send "<##EEE8AA>/tpa send <playername> &f| 해당 플레이어에게 TPA를 겁니다"
+			send "<##EEE8AA>/tpa ban <playername> &f| 해당 플레이어가 %player%님에게 보내는 TPA를 차단합니다"
+			send "<##EEE8AA>/tpa unban <playername> &f| 해당 플레이어가 %player%님에게 보내는 TPA의 차단을 해제합니다"
+			if player has permission "sk.admin":
+				send ""
+				send "ADMIN COMMAND"
+				send "<##EEE8AA>/tpaban <playername> &f| 해당 플레이어의 TPA 사용 금지"
+				send "<##EEE8AA>/tpaunban <playername> &f| 해당 플레이어의 TPA 사용 금지 해제"
+			stop
+		if arg 1 is not "send" or "ban" or "unban" or "allban" or "allunban" or "coreadmintparemove":
+			send "<##EEE8AA>TPA &7TPA SYSTEM"
+			send ""
+			send "<##EEE8AA>/tpa send <playername> &f| 해당 플레이어에게 TPA를 겁니다"
+			send "<##EEE8AA>/tpa ban <playername> &f| 해당 플레이어가 %player%님에게 보내는 TPA를 차단합니다"
+			send "<##EEE8AA>/tpa unban <playername> &f| 해당 플레이어가 %player%님에게 보내는 TPA의 차단을 해제합니다"
+			if player has permission "sk.admin":
+				send ""
+				send "ADMIN COMMAND"
+				send "<##EEE8AA>/tpaban <playername> &f| 해당 플레이어의 TPA 사용 금지"
+				send "<##EEE8AA>/tpaunban <playername> &f| 해당 플레이어의 TPA 사용 금지 해제"
+			stop
+		if arg 1 is "send":	
+			if arg 2 is "%player%":
+				send "<##EEE8AA>TPA &f내 자신은 영원한 동반자랍니다."
+				stop
+			if {%arg 2%.tpa.offon} is set:
+				send "<##EEE8AA>TPA &f해당 플레이어가 tpa 시스템을 &c비활성화 &f한 상태 입니다."
+			else:
+				if {%arg 2%.tpa.Blacklist.%player%} is set:
+					send "<##EEE8AA>TPA &f%arg 2%님이 당신의 TPA를 차단한 상태입니다."
+				else:
+					if {%player%.tpa.ban} is set:
+						send "<##EEE8AA>TPA &f당신은 관리자의 의하여 TPA 시스템 사용이 금지되었습니다. 운영진에게 문의 바랍니다."
+					else:
+						if {%arg 2%.tpa.player} is set:
+							send "<##EEE8AA>TPA &f%arg 2%님에게 이미 TPA 요청이 있는 상태입니다, 잠시후에 시도해주세요"
+						else:
+							if arg 2 is set:
+								if {%arg 2%.tpa.offon} is not set:
+									set {_cooldown} to difference between {%player%.tpa.cooldown} and now
+									if {_cooldown} is less than 15 seconds:
+										set {_text} to "%difference between 15 seconds and {_cooldown}%"
+										replace all " seconds" and " second" with "초" in {_text}
+										replace all " and " with " " in {_text}
+										send "<##EEE8AA>TPA &fTPA를 다시 할수 있을떄 까지 %{_text}% 남았습니다."
+										exit
+									set {%player%.tpa.cooldown} to now
+									send "<##EEE8AA>T &f%arg 2% &f님에게 &7tpa &f신청을 보냈습니다. &8해당 요청은 15초뒤에 자동으로 거절됩니다."
+									send "<##EEE8AA>T &f%player%&f님이 TPA 요청을 보냈습니다. <ttp:TPA 요청을 수락합니다!><cmd:/tpaccept>&a[수락]<reset> <ttp:TPA 요청을 거절합니다.><cmd:/tpdeny>&c[거절]<reset> &715초후 자동으로 거절됩니다." to arg 2
+#(야생서버 추천)									send "&4&l+ &c모르는 사람의 TPA를 수락하시면 좌표 유출, 살해, 테러의 위험성이 매우 높습니다." to arg 2
+#									send "&c한번더 확인해보고 수락을 눌러주세요." to arg 2
+									set {%arg 2%.tpa.accept} to 1
+									set {%arg 2%.tpa.location} to location of player
+									set {%arg 2%.tpa.player} to player
+									wait 15 second
+									if {%arg 2%.tpa.accept} is set:
+										delete {%arg 2%.tpa.accept}
+										delete {%arg 2%.tpa.location}
+										delete {%arg 2%.tpa.player}
+										send "<##EEE8AA>TPA &fTPA 요청이 만료되었습니다!"
+										send "<##EEE8AA>TPA &fTPA 요청이 만료되었습니다" to arg 2
+		if arg 1 is "ban":	
+			if arg 2 is "%player%":
+				send "<##EEE8AA>TPA &f아무리 자신이 싫더라도 자신을 밴하지 맙시다;."
+				stop
+			else:
+				if arg 2 is offline:
+					send "<##EEE8AA>TPA &f해당 플레이어는 현재 오프라인 상태입니다"
+				else:
+					send "<##EEE8AA>TPA &f%arg 2%님을 차단하였습니다."
+					set {%player%.tpa.Blacklist.%arg 2%} to 1	
+		if arg 1 is "unban":	
+			if arg 2 is "%player%":
+				send "<##EEE8AA>TPA &f어? 어디서 꼼수를!"
+				stop
+			else:
+				if arg 2 is offline:
+					send "<##EEE8AA>TPA &f해당 플레이어는 현재 오프라인 상태입니다"
+				else:
+					send "<##EEE8AA>TPA &f%arg 2%님 차단을 해제하였습니다."
+					delete {%player%.tpa.Blacklist.%arg 2%}
+
+command /tpaoff:
+	trigger:
+		set {%player%.tpa.offon} to 1
+		send "<##EEE8AA>TPA &fTPA 시스템을 &c비활성화 &f하셨습니다! <cmd:/tpaon>&a[활성화]<reset>"
+		stop
+		
+command /tpaon:
+	trigger:
+		delete {%player%.tpa.offon}
+		send "<##EEE8AA>TPA &fTPA 시스템을 &a활성화 &f하셨습니다! <cmd:/tpaoff>&c[비활성화]<reset>"
+		stop
+
+
+command /tpaccept:
+	trigger:
+		if {%player%.tpa.accept} is not set:
+			message "<##EEE8AA>TPA &7%player%&f님에게 온 텔레포트 요청이 없습니다."
+		else:
+			if {%player%.tpa.accept} is set:
+				delete {%player%.tpa.accept}
+				send "<##EEE8AA>TPA &f요청을 수락하셨습니다!"
+				send "<##EEE8AA>TPA &f요청이 수락되었습니다!" to {%player%.tpa.player}
+				broadcast "<##EEE8AA>T &7%{%player%.tpa.player}%님&f이 &7%player%님&f에게 TPA를 하였습니다"
+				teleport {%player%.tpa.player} to player
+				delete {%player%.tpa.location}
+				delete {%player%.tpa.player}
+
+
+command /tpdeny:
+	trigger:
+		if {%player%.tpa.accept} is not set:
+			message "<##EEE8AA>TPA &7%player%&f님에게 온 텔레포트 요청이 없습니다."
+		else:
+			if {%player%.tpa.accept} is set:
+				send "<##EEE8AA>TPA &f요청을 거절하셨습니다."
+				send "<##EEE8AA>TPA &f요청이 거절되었습니다." to {%player%.tpa.player}
+				delete {%player%.tpa.accept}
+				delete {%player%.tpa.location}
+				delete {%player%.tpa.player}
+		
+command /tpaban [<text>]:
+	permission: sk.admin
+	permission message: &cS /tpa ban [<PLAYER>] 띄어쓰기 확인하고 다시 입력하세요!.
+	trigger:
+		send "<##EEE8AA>T &7%arg 1%님&f의 TPA 시스템 사용을 금지시켰습니다!"
+		broadcast "<##EEE8AA>T &f%arg 1%님이 관리자의 의해 TPA 시스템 사용이 금지되었습니다."
+		set {%arg 1%.tpa.ban} to 1
+		
+command /tpaunban [<text>]:
+	permission: sk.admin
+	permission message: &cS /tpa unban [<PLAYER>] 띄어쓰기 확인하고 다시 입력하세요!.
+	trigger:
+		send "<##EEE8AA>T &7%arg 1%님&f의 TPA 시스템 사용 금지을 해제시켰습니다."
+		broadcast "<##EEE8AA>T &f%arg 1%님의 TPA 시스템 사용 금지가 해제되었습니다."
+		delete {%arg 1%.tpa.ban}
