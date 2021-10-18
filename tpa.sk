@@ -27,30 +27,35 @@ command /tpa [<text>] [<player>]:
 				send "<##EEE8AA>/tpaban <playername> &f| 해당 플레이어의 TPA 사용 금지"
 				send "<##EEE8AA>/tpaunban <playername> &f| 해당 플레이어의 TPA 사용 금지 해제"
 			stop
-		if arg 1 is "send":	
+		if arg 1 is "send":
+#자기 자신에게 보내는 TPA 감지
 			if arg 2 is "%player%":
 				send "<##EEE8AA>TPA &f내 자신은 영원한 동반자랍니다."
 				stop
+#TPA 활성화 여부
 			if {%arg 2%.tpa.offon} is set:
 				send "<##EEE8AA>TPA &f해당 플레이어가 tpa 시스템을 &c비활성화 &f한 상태 입니다."
 			else:
+#보내는 플레이어의 TPA 차단 여부
 				if {%arg 2%.tpa.Blacklist.%player%} is set:
 					send "<##EEE8AA>TPA &f%arg 2%님이 당신의 TPA를 차단한 상태입니다."
 				else:
+#관리자의 의하여 TPA 차단
 					if {%player%.tpa.ban} is set:
 						send "<##EEE8AA>TPA &f당신은 관리자의 의하여 TPA 시스템 사용이 금지되었습니다. 운영진에게 문의 바랍니다."
 					else:
+#요청 있음 감지
 						if {%arg 2%.tpa.player} is set:
 							send "<##EEE8AA>TPA &f%arg 2%님에게 이미 TPA 요청이 있는 상태입니다, 잠시후에 시도해주세요"
 						else:
 							if arg 2 is set:
 								if {%arg 2%.tpa.offon} is not set:
 									set {_cooldown} to difference between {%player%.tpa.cooldown} and now
-									if {_cooldown} is less than 15 seconds:
+									if {_cooldown} is less than 15 seconds:  #15초 쿨타운
 										set {_text} to "%difference between 15 seconds and {_cooldown}%"
 										replace all " seconds" and " second" with "초" in {_text}
 										replace all " and " with " " in {_text}
-										send "<##EEE8AA>TPA &fTPA를 다시 할수 있을떄 까지 %{_text}% 남았습니다."
+										send "<##EEE8AA>TPA &fTPA를 다시 할수 있을떄 까지 %{_text}% 남았습니다." #tpa를 사용할수 있기까지 남은 시간
 										exit
 									set {%player%.tpa.cooldown} to now
 									send "<##EEE8AA>T &f%arg 2% &f님에게 &7tpa &f신청을 보냈습니다. &8해당 요청은 15초뒤에 자동으로 거절됩니다."
